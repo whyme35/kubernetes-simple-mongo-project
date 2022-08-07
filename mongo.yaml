@@ -1,3 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+  storageClassName: "db"
+  accessModes:
+    - ReadWriteOnce
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,6 +48,13 @@ spec:
             secretKeyRef:
               name: mongodb-secret
               key: mongo-root-password
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -46,4 +67,3 @@ spec:
   - port: 27017
     targetPort: 27017
     protocol: TCP
-
